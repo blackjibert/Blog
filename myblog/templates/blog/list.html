@@ -55,18 +55,56 @@
 
         {% for article in articles %}
             <div class="list-group">
-                <li class="list-group-item list-group-item-action list-group-item-light">
-                    <h4 class="mb-2">{{ article.title }}</h4>
-                    <p class="m-1">内容摘要:{{ article.body|slice:'100' }}...</p>
-                    <span>
-                        <small class="col align-self-end" style="color: gray;">
-                            浏览: {{ article.total_views }}
-                        </small>
-                    </span >
 
-                        <a href="{%url 'blog:article_detail' article.id %}" style="color:#74787c">
-                            阅读本文
-                        </a>
+                <li class="list-group-item list-group-item-action list-group-item-light">
+                    <!-- 栏目 -->
+                    {% if article.column %}
+                        <button type="button"
+                            class="btn btn-sm mb-2
+                                {% if article.column.title == 'Django' %}
+                                    btn-success
+                                {% elif article.column.title == 'Java' %}
+                                    btn-danger
+                                {% elif article.column.title == 'HTML' %}
+                                    btn-warning
+                                {% endif %}
+                            "
+                        >
+                            {{ article.column }}
+                        </button>
+                    {% endif %}
+
+                    <!-- 标签 -->
+{#                    <div class="col-12">#}
+                        <span>
+                            {% for tag in article.tags.all %}
+                                <a href="#" class="badge badge-secondary">
+                                    标签:{{ tag }}
+                                </a>
+                            {% endfor %}
+                        </span>
+{#                    </div>#}
+
+                    <!--标题-->
+                    <h4 class="mb-2"><strong>{{ article.title }}</strong></h4>
+                    <p class="m-1">内容摘要:{{ article.body|slice:'100' }}...</p>
+                    <!-- 注脚 -->
+                    <p>
+                        <!-- 附加信息 -->
+                        <span style="color: green;">
+                            {{ article.total_views }} 浏览&nbsp;&nbsp;&nbsp;
+                        </span>
+                        <span style="color: blue;">
+                            {{ article.created_time|date:'Y-m-d' }} 发布&nbsp;&nbsp;&nbsp;
+                        </span>
+                        <span style="color: darkred;">
+                            {{ article.updated_time|date:'Y-m-d' }} 更新
+                        </span>
+                    </p>
+                    <hr>
+                    <a href="{%url 'blog:article_detail' article.id %}" style="color:#74787c">
+                        阅读本文
+                    </a>
                 </li>
 
 

@@ -17,6 +17,10 @@ from django.db.models import Q
 #引入分页模块
 from django.core.paginator import Paginator
 from comment.models import Comment
+
+from .models import ArticleColumn
+#引入评论表单
+from comment.forms import CommentForm
 #文章列表
 def article_list(request):
 
@@ -75,7 +79,16 @@ def article_detail(request, id):
 
     #取出文章评论
     comments = Comment.objects.filter(article=id)
-    context = {'article': article, 'toc': md.toc, 'comments': comments}
+
+    #引入评论表单
+    comment_form = CommentForm()
+
+    context = {
+            'article': article,
+            'toc': md.toc,
+            'comments': comments,
+            'comment_form': comment_form,
+    }
     return render(request, 'blog/detail.html', context)
 
 #写文章视图
@@ -91,9 +104,14 @@ def article_create(request):
             new_article = article_post_form.save(commit=False)
             #指定目前登录的用户为作者
             new_article.author = User.objects.get(id=request.user.id)
-
+            # 新增的代码
+            if request.POST['column'] != 'none':
+                new_article.column = ArticleColumn.objects.get(id=request.POST['column'])
             #将新文章报窜到数据库中
             new_article.save()
+
+            # 新增代码，保存 tags 的多对多关系
+            article_post_form.save_m2m()
             return redirect('blog:article_list')
         else:
             return HttpResponse('表单内容有误,请重新填写')
@@ -102,7 +120,8 @@ def article_create(request):
         #创建表单类实例
         article_post_form = ArticlePostForm()
         #赋值上下文
-        context = {'article_post_form': article_post_form}
+        columns =ArticleColumn.objects.all()
+        context = {'article_post_form': article_post_form, 'columns': columns}
         return render(request, 'blog/create.html', context)
 
 
@@ -127,9 +146,16 @@ def article_update(request, id):
             #保存新写入的文章
             article.title = request.POST['title']
             article.body = request.POST['body']
-            article.tags = request.POST['tags']
+            article.tags.set(request.POST['tags'],clear=True)
+
+            if request.POST['column'] !='none':
+                article.column = ArticleColumn.objects.get(id=request.POST['column'])
+            else:
+                article.column = None
             # 将修改后的文章保存到数据库中
             article.save()
+            # # 新增代码，保存 tags 的多对多关系
+            # article_post_form.save_m2m()
             #完成后返回修改的页面.需要传入问斩的id
             return redirect('blog:article_detail', id=id)
         #如果数据不合法,则返回
@@ -140,6 +166,8 @@ def article_update(request, id):
         # 创建表单类实例
         article_post_form = ArticlePostForm()
         # 赋值上下文,将article文章对象也传递进来
-        context = {'article': article, 'article_post_form': article_post_form}
+        columns = ArticleColumn.objects.all()
+
+        context = {'article': article, 'article_post_form': article_post_form, 'columns': columns}
         #将响应返回到模板
         return render(request, 'blog/update.html', context)

@@ -28,6 +28,11 @@
     <script src="{% static 'bootstrap/js/bootstrap.js' %}"></script>
     <!-- 引入layer.js -->
     <script src="{% static 'layer/layer.js' %}"></script>
+
+    <!-- 新增代码 -->
+    {% block script %}
+        <!--Ckeditor编辑器本身有一个inline-block的样式，阻碍了自适应效果，需要用Jquery语法将其清除掉。-->
+    {% endblock script %}
 </body>
 
 </html>
