@@ -1,9 +1,12 @@
-{% extends "base.html" %} {% load staticfiles %}
+{% extends "base.html" %}
+{% load static %}
 {% block title %} 登录 {% endblock title %}
 {% block content %}
 <div class="container">
-{#    <div class="row">#}
-{#        <div class="col-12">#}
+    {#
+    <div class="row">#}
+        {#
+        <div class="col-12">#}
             <br>
             <form method="post" action=".">
                 {% csrf_token %}
